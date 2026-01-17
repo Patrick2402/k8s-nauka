@@ -1,0 +1,54 @@
+# 1. Serwis "Główny" (Publiczny)
+kind: Service
+apiVersion: v1
+metadata:
+  name: rollout-bluegreen-active
+spec:
+  selector:
+    app: rollout-bluegreen
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+---
+# 2. Serwis "Podgląd" (Tylko dla Ciebie do testów)
+kind: Service
+apiVersion: v1
+metadata:
+  name: rollout-bluegreen-preview
+spec:
+  selector:
+    app: rollout-bluegreen
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+---
+# 3. ROLLOUT (Zamiast Deploymentu!)
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: rollout-bluegreen
+spec:
+  replicas: 2
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: rollout-bluegreen
+  template:
+    metadata:
+      labels:
+        app: rollout-bluegreen
+    spec:
+      containers:
+      - name: rollout-demo
+        image: argoproj/rollouts-demo:blue  # Startujemy od koloru NIEBIESKIEGO
+        ports:
+        - containerPort: 8080
+  strategy:
+    blueGreen: 
+      # Wskazujemy serwisy
+      activeService: rollout-bluegreen-active
+      previewService: rollout-bluegreen-preview
+      # To jest ważne: Argo zatrzyma się i poczeka na Twoją zgodę przed przełączeniem!
+      autoPromotionEnabled: false
