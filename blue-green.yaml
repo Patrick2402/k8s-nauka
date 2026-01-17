@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
       - name: rollout-demo
-        image: argoproj/rollouts-demo:blue  # Startujemy od koloru NIEBIESKIEGO
+        image: argoproj/rollouts-demo:green  # Startujemy od koloru NIEBIESKIEGO
         ports:
         - containerPort: 8080
   strategy:
