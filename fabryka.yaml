@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: moje-mikroserwisy
+  namespace: argocd
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/Patrick2402/k8s-nauka.git
+      revision: HEAD
+      directories:
+      # Ważne: Mówimy Argo, żeby szukał folderów zaczynających się na "service-"
+      - path: service-*
+  template:
+    metadata:
+      name: '{{path.basename}}-app'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/Patrick2402/k8s-nauka.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: default
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
